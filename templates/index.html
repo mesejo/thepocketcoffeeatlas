@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pocket Coffee Atlas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fef7ed 0%, #fed7aa 100%);
+            min-height: 100vh;
+            color: #374151;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #6b7280;
+        }
+
+        .search-section {
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 16px;
+            border: 2px solid #fbbf24;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #f59e0b;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #fbbf24;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .tab-button:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .tab-button:last-child {
+            border-radius: 0 10px 10px 0;
+            border-left: none;
+        }
+
+        .tab-button.active {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #fef3c7;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .card-subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        .card-description {
+            color: #6b7280;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag.roaster {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: #d97706;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                max-width: 300px;
+                margin: 0 auto 30px;
+            }
+            
+            .tab-button {
+                border-radius: 0;
+                border-left: 2px solid #fbbf24;
+            }
+            
+            .tab-button:first-child {
+                border-radius: 10px 10px 0 0;
+            }
+            
+            .tab-button:last-child {
+                border-radius: 0 0 10px 10px;
+                border-top: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>☕ The Pocket Coffee Atlas</h1>
+            <p>Discover exceptional coffee</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search coffees"
+                >
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <span hidden id="coffee-count">{{ coffee_count }}</span>
+
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="error hidden"></div>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading hidden">
+            <p>Searching...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results-grid"></div>
+
+        <!-- No Results -->
+        <div id="no-results" class="no-results hidden">
+            <h3>No results found</h3>
+            <p>Try adjusting your search terms or browse all items</p>
+        </div>
+    </div>
+
+    <script>
+        // Initial data from server
+        const initialData = {
+            coffees: {{ initial_coffees | tojson }}
+        };
+
+        // State management
+        let currentTab = 'coffees';
+        let currentSearch = '';
+        let searchTimeout;
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('results');
+        const loadingElement = document.getElementById('loading');
+        const noResultsElement = document.getElementById('no-results');
+        const errorElement = document.getElementById('error');
+        const coffeeCountElement = document.getElementById('coffee-count');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            displayResults(initialData[currentTab]);
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Search input
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    currentSearch = e.target.value.toLowerCase();
+                    performSearch();
+                }, 300); // Debounce search
+            });
+
+            // Tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            
+            // Load data for current tab
+            performSearch();
+        }
+
+        function performSearch() {
+            showLoading();
+            hideError();
+            
+            const params = new URLSearchParams({
+                type: currentTab,
+                search: currentSearch
+            });
+            
+            fetch(`/api/search?${params}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    displayResults(data.data);
+                    updateCounts(data.count);
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error('Search failed:', error);
+                    showError(`Search failed: ${error.message}`);
+                    hideLoading();
+                    showNoResults();
+                });
+        }
+
+        function displayResults(results) {
+            if (results.length === 0) {
+                showNoResults();
+                return;
+            }
+            
+            hideNoResults();
+            
+            const html = results.map(item => {
+                    return createCoffeeCard(item);
+            }).join('');
+            
+            resultsContainer.innerHTML = html;
+        }
+
+        function createCoffeeCard(coffee) {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${coffee.name}</div>
+                        </div>
+                        <div class="price">$${coffee.price.toFixed(2)}</div>
+                    </div>
+                    <button class="button" onclick="window.location.href='${coffee.url}';">
+                        Go To Page
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateCounts(count) {
+                coffeeCountElement.textContent = count;
+        }
+
+        function showLoading() {
+            loadingElement.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            noResultsElement.classList.add('hidden');
+        }
+
+        function hideLoading() {
+            loadingElement.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+        }
+
+        function showNoResults() {
+            noResultsElement.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+        }
+
+        function hideNoResults() {
+            noResultsElement.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorElement.classList.add('hidden');
+        }
+
+        function viewCoffee(id) {
+            fetch(`/api/coffee/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(`Error: ${data.error}`);
+                        return;
+                    }
+                    
+                    const coffee = data.coffee;
+
+                    let message = `${coffee.name}\n`;
+                    message += `Price: $${coffee.price.toFixed(2)}\n`;
+                    alert(message);
+                })
+                .catch(error => {
+                    alert(`Failed to load coffee details: ${error.message}`);
+                });
+        }
+    </script>
+</body>
+</html>
